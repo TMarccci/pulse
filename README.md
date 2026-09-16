@@ -75,11 +75,25 @@ dotnet build PulseAgent.slnx -c Debug
 
 ## Production
 
-- **Server:** `docker compose up -d` (see [`docs/SERVER.md`](docs/SERVER.md)), or the
-  zip + Windows-service / systemd install under [`installer/server`](installer/server).
-- **Agent:** build the installer with `pwsh scripts/build-agent.ps1 -Version X.Y.Z`
-  (needs [Inno Setup](https://jrsoftware.org/isdl.php)), then run
-  `PulseAgentSetup-X.Y.Z.exe` on each workstation. See [`docs/AGENT.md`](docs/AGENT.md).
+**Server on Windows — one command.** In an **elevated** PowerShell, this downloads the
+latest release, bundles a portable Node.js if one isn't installed, prompts for an admin
+account, and installs Pulse as a Windows service (dashboard at `http://localhost:8080`):
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/TMarccci/pulse/main/installer/server/install-server.ps1 -OutFile install-server.ps1
+.\install-server.ps1
+```
+
+Useful switches: `-Port`, `-TimeZone 'Europe/Budapest'`, `-Version`, `-InstallDir`,
+`-AdminUser`/`-AdminPassword`. Re-running upgrades in place (keeps `data/`). See
+[`installer/server/install-server.ps1`](installer/server/install-server.ps1).
+
+**Other server options:** `docker compose up -d`, or the manual zip / systemd install —
+see [`docs/SERVER.md`](docs/SERVER.md).
+
+**Agent:** build the installer with `pwsh scripts/build-agent.ps1 -Version X.Y.Z`
+(needs [Inno Setup](https://jrsoftware.org/isdl.php)), then run
+`PulseAgentSetup-X.Y.Z.exe` on each workstation. See [`docs/AGENT.md`](docs/AGENT.md).
 
 ## Releases & auto-update
 

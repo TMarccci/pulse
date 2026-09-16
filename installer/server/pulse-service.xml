@@ -17,11 +17,14 @@
   <env name="PULSE_DB" value="%BASE%\data\pulse.db" />
   <env name="PULSE_SESSION_TTL_MIN" value="60" />
   <env name="PULSE_ONLINE_WINDOW_SEC" value="120" />
-  <!-- Set once, then remove after first boot; or use `node src\seed.js`. -->
-  <env name="PULSE_ADMIN_USER" value="admin" />
-  <env name="PULSE_ADMIN_PASS" value="" />
-  <!-- Advertise the agent update repo (owner/repo). -->
-  <env name="PULSE_AGENT_REPO" value="" />
+  <!-- Local timezone for the work-hours analytics filter, e.g. Europe/Budapest. -->
+  <env name="TZ" value="UTC" />
+  <!-- The update repo is HARDCODED to TMarccci/pulse in the app, so nothing is
+       needed here. Only set PULSE_REPO if you run a fork. -->
+  <!-- <env name="PULSE_REPO" value="owner/repo" /> -->
+  <!-- Create the admin with `node src\seed.js admin <user> <pass>` instead of
+       putting credentials here. -->
+
 
   <onfailure action="restart" delay="10 sec" />
   <log mode="roll-by-size">

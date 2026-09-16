@@ -43,7 +43,34 @@ docker compose up -d
 Data persists in `./data`. Put a TLS-terminating reverse proxy (Caddy/nginx/Traefik)
 in front and set `PULSE_SECURE_COOKIES=true`.
 
-## Run from the zip package
+## Windows — one-command install (recommended)
+
+[`installer/server/install-server.ps1`](../installer/server/install-server.ps1) does
+everything: downloads the latest release, bundles a portable Node.js if one isn't
+already installed, creates an admin, and installs Pulse as a Windows service.
+
+In an **elevated** PowerShell:
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/TMarccci/pulse/main/installer/server/install-server.ps1 -OutFile install-server.ps1
+.\install-server.ps1
+```
+
+It prompts for an admin username/password, then serves the dashboard at
+`http://localhost:8080`. Useful switches:
+
+```powershell
+.\install-server.ps1 -Port 9090 -TimeZone 'Europe/Budapest' `
+                     -AdminUser admin -AdminPassword 'S3cret!' -InstallDir 'D:\Pulse'
+```
+
+- Run **as Administrator** to install a real Windows service (auto-starts on boot).
+  Without elevation it registers a per-user **logon task** instead.
+- Re-running upgrades in place (code is replaced, `data/` is kept).
+- Uninstall: `installer/server/uninstall-windows-service.ps1` (or remove the
+  `PulseServer` scheduled task), then delete the install directory.
+
+## Run from the zip package (manual)
 
 `scripts/build-server.ps1` (or the Server Release pipeline) produces
 `pulse-server-<ver>.zip` containing `src/`, `public/`, and production `node_modules`.
@@ -54,7 +81,7 @@ node src/seed.js admin youruser yourpass   # create an admin
 PULSE_PORT=8080 node src/index.js
 ```
 
-- **Windows service:** copy the files from [`installer/server`](../installer/server)
+- **Windows service (manual):** copy the files from [`installer/server`](../installer/server)
   into the folder and run `install-windows-service.ps1` (elevated). Requires Node on PATH.
 - **Linux:** use [`installer/server/pulse.service`](../installer/server/pulse.service).
 
