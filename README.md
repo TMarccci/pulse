@@ -80,6 +80,7 @@ latest release, bundles a portable Node.js if one isn't installed, prompts for a
 account, and installs Pulse as a Windows service (dashboard at `http://localhost:8080`):
 
 ```powershell
+Set-ExecutionPolicy -Scope Process Bypass -Force   # allow this session to run the script
 iwr -useb https://raw.githubusercontent.com/TMarccci/pulse/main/installer/server/install-server.ps1 -OutFile install-server.ps1
 .\install-server.ps1
 ```

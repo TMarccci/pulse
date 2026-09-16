@@ -52,9 +52,15 @@ already installed, creates an admin, and installs Pulse as a Windows service.
 In an **elevated** PowerShell:
 
 ```powershell
+Set-ExecutionPolicy -Scope Process Bypass -Force   # allow this session to run the script
 iwr -useb https://raw.githubusercontent.com/TMarccci/pulse/main/installer/server/install-server.ps1 -OutFile install-server.ps1
 .\install-server.ps1
 ```
+
+> `Set-ExecutionPolicy -Scope Process Bypass` affects only the current PowerShell
+> window (nothing persists). Without it, Windows blocks the downloaded script with
+> *"running scripts is disabled on this system."* You can also run it directly with
+> `powershell -ExecutionPolicy Bypass -File .\install-server.ps1`.
 
 It prompts for an admin username/password, then serves the dashboard at
 `http://localhost:8080`. Useful switches:
