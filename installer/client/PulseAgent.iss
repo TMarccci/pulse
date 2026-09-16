@@ -9,6 +9,9 @@
 #ifndef AgentExe
   #define AgentExe "..\..\agent\PulseAgent\publish\PulseAgent.exe"
 #endif
+#ifndef IconFile
+  #define IconFile "..\..\assets\pulse.ico"
+#endif
 
 #define AppName "Pulse Agent"
 #define Publisher "Pulse"
@@ -30,7 +33,8 @@ DisableReadyPage=no
 DisableDirPage=yes
 Uninstallable=yes
 UninstallDisplayName={#AppName}
-UninstallDisplayIcon={app}\PulseAgent.exe
+UninstallDisplayIcon={app}\pulse.ico
+SetupIconFile={#IconFile}
 OutputDir=Output
 OutputBaseFilename=PulseAgentSetup-{#AppVersion}
 Compression=lzma2/max
@@ -45,6 +49,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: "{#AgentExe}"; DestDir: "{app}"; DestName: "PulseAgent.exe"; Flags: ignoreversion
+Source: "{#IconFile}"; DestDir: "{app}"; DestName: "pulse.ico"; Flags: ignoreversion
 
 [Run]
 ; After install, launch the agent. On first run it shows the config window; if the

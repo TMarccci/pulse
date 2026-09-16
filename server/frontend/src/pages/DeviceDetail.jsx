@@ -8,6 +8,8 @@ import { useFetch } from '../lib/useFetch.js';
 import { api } from '../api.js';
 import { StatCard, RangePicker, Spinner, Chip, Empty } from '../components/ui.jsx';
 import { ExportMenu } from '../components/ExportMenu.jsx';
+import { WorkHoursToggle } from '../components/WorkHoursToggle.jsx';
+import { useWorkHours } from '../lib/useWorkHours.js';
 import { fmtNumber, fmtDuration, fmtClock, relativeTime, bucketLabel } from '../lib/format.js';
 
 const chartAxis = { stroke: '#8792ad', fontSize: 12 };
@@ -17,8 +19,11 @@ export default function DeviceDetail() {
   const { id } = useParams();
   const nav = useNavigate();
   const [range, setRange] = useState('24h');
+  const [workHoursOnly, setWorkHoursOnly] = useWorkHours();
+  const whParam = workHoursOnly ? '&workHours=1' : '';
   const info = useFetch(`/devices/${id}`, [id], 20000);
-  const analytics = useFetch(`/analytics/device/${id}?range=${range}`, [id, range], 30000);
+  const analytics = useFetch(
+    `/analytics/device/${id}?range=${range}${whParam}`, [id, range, workHoursOnly], 30000);
 
   const d = info.data?.device;
   const series = (analytics.data?.series || []).map((s) => ({
@@ -52,9 +57,11 @@ export default function DeviceDetail() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <WorkHoursToggle value={workHoursOnly} onChange={setWorkHoursOnly} workHours={analytics.data?.workHours} />
           <RangePicker value={range} onChange={setRange} />
-          <ExportMenu kind="samples" params={{ deviceId: id, range }} />
+          <ExportMenu kind="samples"
+            params={{ deviceId: id, range, ...(analytics.data?.workHoursApplied ? { workHours: 1 } : {}) }} />
           <button className="btn btn-danger" onClick={remove}><Trash2 size={16} /> Delete</button>
         </div>
       </div>

@@ -17,7 +17,20 @@ Node.js/Express API + React dashboard, backed by SQLite via the built-in
 | `PULSE_CORS_DEV_ORIGIN`  | *(empty)*          | Allow a cross-origin dev frontend                   |
 | `PULSE_ADMIN_USER`       | `admin`            | Bootstrap admin username                            |
 | `PULSE_ADMIN_PASS`       | *(empty)*          | Bootstrap admin password (created on first run)     |
-| `PULSE_AGENT_REPO`       | *(empty)*          | `owner/repo` advertised to agents for self-update   |
+| `PULSE_REPO`             | `TMarccci/pulse`   | Monorepo used for agent + server self-update         |
+| `PULSE_AUTO_UPDATE`      | `false`            | Auto-apply new `server-v*` releases (non-Docker)    |
+| `PULSE_IN_DOCKER`        | auto               | Disables self-update; set by the image              |
+
+> The repo is **hardcoded** to `TMarccci/pulse`, so no configuration is needed to
+> receive updates. `PULSE_REPO` only matters if you fork.
+
+## Server self-update
+
+The server checks the repo's Releases for a newer `server-vX.Y.Z` every 6 hours and
+on startup. **Settings → Server updates** shows the status with **Check now** /
+**Update now**; applying downloads the release zip, overwrites the app files, and exits
+so the service manager restarts it on the new version. Set `PULSE_AUTO_UPDATE=true` to
+apply automatically. In Docker this is disabled — pull the new image instead.
 
 ## Run with Docker (recommended)
 
@@ -53,6 +66,20 @@ node src/seed.js key   [label]                 # mint an enrollment key
 ```
 
 Enrollment keys are also managed in **Settings → Enrollment keys** in the dashboard.
+
+## Work hours & timezone
+
+**Settings → Work hours** defines a daily window (start/end + work days) used to focus
+analytics and exports when the **Work hours** toggle is on (Dashboard / device pages).
+The filter is evaluated in the **server's local timezone**, so set the container/host
+`TZ` to match the workplace — e.g. in `docker-compose.yml`:
+
+```yaml
+    environment:
+      TZ: "Europe/Budapest"
+```
+
+Otherwise (Docker defaults to UTC) the 9–16 window would be applied in UTC.
 
 ## Security notes
 

@@ -9,6 +9,8 @@ services:
     volumes:
       - ./data:/data
     environment:
+      # Local timezone — must match the workplace for the work-hours filter.
+      TZ: "${TZ:-UTC}"
       # First-run bootstrap admin (change the password!).
       PULSE_ADMIN_USER: "${PULSE_ADMIN_USER:-admin}"
       PULSE_ADMIN_PASS: "${PULSE_ADMIN_PASS:-}"
@@ -18,6 +20,6 @@ services:
       PULSE_ONLINE_WINDOW_SEC: "${PULSE_ONLINE_WINDOW_SEC:-120}"
       # Set true when running behind an HTTPS reverse proxy.
       PULSE_SECURE_COOKIES: "${PULSE_SECURE_COOKIES:-false}"
-      # GitHub repo (owner/repo) advertised to agents for self-update.
-      PULSE_AGENT_REPO: "${PULSE_AGENT_REPO:-}"
+      # Update repo is hardcoded to TMarccci/pulse; override only if you fork.
+      PULSE_REPO: "${PULSE_REPO:-TMarccci/pulse}"
     restart: unless-stopped

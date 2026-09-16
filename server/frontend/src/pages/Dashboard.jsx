@@ -6,6 +6,8 @@ import { MonitorSmartphone, Wifi, Keyboard, MousePointer2, Clock } from 'lucide-
 import { useFetch } from '../lib/useFetch.js';
 import { StatCard, RangePicker, Spinner, Empty } from '../components/ui.jsx';
 import { ExportMenu } from '../components/ExportMenu.jsx';
+import { WorkHoursToggle } from '../components/WorkHoursToggle.jsx';
+import { useWorkHours } from '../lib/useWorkHours.js';
 import { fmtNumber, fmtDuration, bucketLabel } from '../lib/format.js';
 
 const chartAxis = { stroke: '#8792ad', fontSize: 12 };
@@ -15,7 +17,10 @@ const tooltipStyle = {
 
 export default function Dashboard() {
   const [range, setRange] = useState('24h');
-  const { data, loading } = useFetch(`/analytics/overview?range=${range}`, [range], 30000);
+  const [workHoursOnly, setWorkHoursOnly] = useWorkHours();
+  const whParam = workHoursOnly ? '&workHours=1' : '';
+  const { data, loading } = useFetch(
+    `/analytics/overview?range=${range}${whParam}`, [range, workHoursOnly], 30000);
 
   const series = (data?.series || []).map((s) => ({
     ...s,
@@ -31,11 +36,19 @@ export default function Dashboard() {
           <h1 className="text-2xl font-semibold">Workplace overview</h1>
           <p className="text-sm text-[var(--color-muted)]">Aggregated activity across all devices</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <WorkHoursToggle value={workHoursOnly} onChange={setWorkHoursOnly} workHours={data?.workHours} />
           <RangePicker value={range} onChange={setRange} />
-          <ExportMenu kind="samples" params={{ range }} label="Export data" />
+          <ExportMenu kind="samples"
+            params={{ range, ...(data?.workHoursApplied ? { workHours: 1 } : {}) }}
+            label="Export data" />
         </div>
       </div>
+      {data?.workHoursApplied && (
+        <div className="text-xs text-[var(--color-brand-2)] -mt-3">
+          Showing work-hours activity only ({data.workHours.start}–{data.workHours.end}).
+        </div>
+      )}
 
       {loading && !data ? <Spinner /> : (
         <>

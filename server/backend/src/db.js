@@ -110,6 +110,15 @@ export const DEFAULT_SETTINGS = {
   // A second of mouse/keyboard inactivity beyond this counts as "idle".
   idleThresholdSeconds: 30,
 
+  // Work hours used to focus analytics/exports. Evaluated in the SERVER's local
+  // timezone (set TZ to match the workplace). days: 0=Sun … 6=Sat.
+  workHours: {
+    enabled: false,
+    start: '09:00',
+    end: '17:00',
+    days: [1, 2, 3, 4, 5],
+  },
+
   // Sync behaviour pushed to agents.
   sync: {
     mode: 'live',              // 'live' | 'timed'

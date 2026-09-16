@@ -12,8 +12,11 @@ namespace PulseAgent.Update;
 // the running version, downloads the installer and launches it silently.
 public sealed partial class Updater
 {
-    // Optional fallback if the server does not advertise a repo. Format "owner/repo".
-    public const string DefaultRepo = "";
+    // Hardcoded Pulse monorepo. The server may still override via update-check.
+    public const string DefaultRepo = "TMarccci/pulse";
+
+    // Only agent releases are tagged like this; server releases are ignored.
+    private const string TagPrefix = "agent-v";
 
     private readonly HttpClient _http;
 
@@ -31,8 +34,14 @@ public sealed partial class Updater
 
         try
         {
-            var rel = await _http.GetFromJsonAsync<GhRelease>(
-                $"https://api.github.com/repos/{repo}/releases/latest", ct);
+            // Monorepo: list releases and pick the newest agent-tagged one.
+            var releases = await _http.GetFromJsonAsync<List<GhRelease>>(
+                $"https://api.github.com/repos/{repo}/releases?per_page=30", ct);
+            var rel = releases?
+                .Where(r => r.TagName != null && !r.Draft && !r.Prerelease
+                            && r.TagName.StartsWith(TagPrefix, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(r => ParseVersion(r.TagName!), Comparer<string>.Create(CompareVersions))
+                .FirstOrDefault();
             if (rel?.TagName == null) return;
 
             var latest = ParseVersion(rel.TagName);
@@ -101,6 +110,8 @@ public sealed partial class Updater
     private sealed class GhRelease
     {
         [JsonPropertyName("tag_name")] public string? TagName { get; set; }
+        [JsonPropertyName("draft")] public bool Draft { get; set; }
+        [JsonPropertyName("prerelease")] public bool Prerelease { get; set; }
         [JsonPropertyName("assets")] public List<GhAsset>? Assets { get; set; }
     }
     private sealed class GhAsset

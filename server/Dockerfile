@@ -22,7 +22,8 @@ COPY --from=webbuild /app/backend/public ./public
 ENV PULSE_PORT=8080 \
     PULSE_HOST=0.0.0.0 \
     PULSE_DB=/data/pulse.db \
-    PULSE_PUBLIC=/app/public
+    PULSE_PUBLIC=/app/public \
+    PULSE_IN_DOCKER=true
 VOLUME /data
 EXPOSE 8080
 CMD ["node", "src/index.js"]

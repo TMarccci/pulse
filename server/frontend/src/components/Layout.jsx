@@ -5,6 +5,7 @@ import {
   Activity, LogOut,
 } from 'lucide-react';
 import { useAuth } from '../auth.jsx';
+import { UpdateBanner } from './UpdateBanner.jsx';
 
 const nav = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -70,6 +71,7 @@ export default function Layout() {
         <header className="h-14 border-b border-[var(--color-border)] flex items-center justify-end gap-4 px-6 bg-[var(--color-surface)]">
           <SessionCountdown expiresAt={expiresAt} />
         </header>
+        <UpdateBanner />
         <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>

@@ -11,6 +11,8 @@ import { devicesRouter } from './routes/devices.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { settingsRouter } from './routes/settings.js';
 import { exportRouter } from './routes/export.js';
+import { updatesRouter } from './routes/updates.js';
+import { startUpdateChecker } from './services/updater.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -37,6 +39,7 @@ app.use('/api/devices', devicesRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/export', exportRouter);
+app.use('/api/updates', updatesRouter);
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 
@@ -70,6 +73,9 @@ bootstrap();
 
 // Periodically clear expired sessions.
 setInterval(purgeExpiredSessions, 5 * 60 * 1000).unref();
+
+// Self-update checker (GitHub Releases → optional auto-apply).
+startUpdateChecker();
 
 app.listen(config.port, config.host, () => {
   console.log(`[pulse] Server listening on http://${config.host}:${config.port}`);

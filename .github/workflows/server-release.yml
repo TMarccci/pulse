@@ -40,12 +40,26 @@ jobs:
         with:
           name: pulse-server-${{ steps.ver.outputs.version }}
           path: dist/pulse-server-${{ steps.ver.outputs.version }}.zip
-      - name: Publish GitHub Release
+      # Draft-first so it works with Immutable Releases (see agent-release.yml).
+      - name: Create draft release with package
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          draft: true
+          tag_name: ${{ github.ref_name }}
           files: dist/pulse-server-${{ steps.ver.outputs.version }}.zip
           name: Pulse Server ${{ steps.ver.outputs.version }}
+          body: |
+            Pulse Server ${{ steps.ver.outputs.version }}
+
+            Servers self-update to this release from Settings → Server updates
+            (or automatically when PULSE_AUTO_UPDATE=true, outside Docker).
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit ${{ github.ref_name }} --draft=false --repo ${{ github.repository }}
 
   docker:
     runs-on: ubuntu-latest
@@ -67,11 +81,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute lowercase image name
+        id: img
+        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/pulse-server" >> "$GITHUB_OUTPUT"
       - name: Build & push image
         uses: docker/build-push-action@v6
         with:
           context: ./server
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/pulse-server:latest
-            ghcr.io/${{ github.repository }}/pulse-server:${{ steps.ver.outputs.version }}
+            ${{ steps.img.outputs.name }}:latest
+            ${{ steps.img.outputs.name }}:${{ steps.ver.outputs.version }}

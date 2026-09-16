@@ -25,8 +25,8 @@ to a central **sync server** with a modern web dashboard.
 - **Devices** screen — nickname, details, archive
 - **Office** screen — drag monitor icons on a canvas, colour-coded by status with
   fully customizable colour rules
-- **Settings** — idle threshold, sync mode (live/timed), colour rules, enrollment keys,
-  agent update floor
+- **Settings** — idle threshold, **work hours** (focus analytics on working time),
+  sync mode (live/timed), colour rules, enrollment keys, agent update floor
 - Data export in CSV / Excel / JSON
 - Admin login with an expiring session + CSRF token (auto-logout on expiry)
 
@@ -83,6 +83,14 @@ dotnet build PulseAgent.slnx -c Debug
 
 ## Releases & auto-update
 
-Tag `server-vX.Y.Z` or `agent-vX.Y.Z` to trigger the release pipelines
-([`docs/BUILD.md`](docs/BUILD.md)). Agents poll the configured GitHub repo's Releases
-and silently install any newer signed installer.
+This is a **monorepo** — both the agent and the server release from
+[`github.com/TMarccci/pulse`](https://github.com/TMarccci/pulse) (hardcoded, no config
+needed). Tag `agent-vX.Y.Z` or `server-vX.Y.Z` to trigger the release pipelines
+([`docs/BUILD.md`](docs/BUILD.md)):
+
+- **Agents** poll the repo's `agent-v*` releases and silently install any newer installer.
+- **The server** checks `server-v*` releases and self-updates from
+  **Settings → Server updates** (or automatically with `PULSE_AUTO_UPDATE=true`, outside
+  Docker).
+
+Licensed under the [MIT License](LICENSE).

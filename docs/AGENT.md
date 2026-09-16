@@ -37,10 +37,11 @@ Data is aggregated into per-minute buckets and delivered by the active **sync mo
 
 ## Self-update
 
-Every 6 hours the agent asks the server where to update (`PULSE_AGENT_REPO`) and the
-minimum required version, then checks that GitHub repo's **latest Release**. If it is
-newer, it downloads the `*Setup*.exe` asset and runs it silently
-(`/VERYSILENT`), which replaces the binary and relaunches the agent.
+The update repo is **hardcoded to `TMarccci/pulse`** (the server can still override it).
+Every 6 hours the agent lists that repo's Releases, picks the newest **`agent-v*`** one
+(server releases are ignored), and if it is newer than the running version downloads the
+`*Setup*.exe` asset and runs it silently (`/VERYSILENT`), which replaces the binary and
+relaunches the agent. Raise **Minimum agent version** in Settings to force the update.
 
 ## Uninstall
 

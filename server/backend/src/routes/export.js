@@ -2,6 +2,8 @@ import { Router } from 'express';
 import * as XLSX from 'xlsx';
 import { db, now } from '../db.js';
 import { requireAdmin } from '../middleware.js';
+import { getSettings } from '../services/settings.js';
+import { workHoursClause } from '../services/workhours.js';
 
 export const exportRouter = Router();
 exportRouter.use(requireAdmin);
@@ -56,13 +58,14 @@ exportRouter.get('/samples', (req, res) => {
   const deviceId = req.query.deviceId;
   const where = deviceId ? 'AND s.device_id = ?' : '';
   const args = deviceId ? [since, deviceId] : [since];
+  const wh = workHoursClause(getSettings(), req.query.workHours === '1', 's.ts');
   const rows = db.prepare(`
     SELECT d.device_name AS device, COALESCE(d.nickname,'') AS nickname,
            datetime(s.ts,'unixepoch') AS time_utc, s.ts AS unix,
            s.keypresses, s.mouse_active_sec, s.mouse_idle_sec,
            COALESCE(s.top_app,'') AS top_app, COALESCE(s.top_title,'') AS top_title
     FROM samples s JOIN devices d ON d.id = s.device_id
-    WHERE s.ts >= ? ${where}
+    WHERE s.ts >= ? ${where}${wh.clause}
     ORDER BY s.ts ASC`).all(...args);
   send(res, rows, format, `pulse-samples-${req.query.range || '24h'}`);
 });
@@ -74,12 +77,13 @@ exportRouter.get('/windows', (req, res) => {
   const deviceId = req.query.deviceId;
   const where = deviceId ? 'AND w.device_id = ?' : '';
   const args = deviceId ? [since, deviceId] : [since];
+  const wh = workHoursClause(getSettings(), req.query.workHours === '1', 'w.ts');
   const rows = db.prepare(`
     SELECT d.device_name AS device, COALESCE(d.nickname,'') AS nickname,
            datetime(w.ts,'unixepoch') AS time_utc,
            COALESCE(w.app,'') AS app, COALESCE(w.title,'') AS title, w.seconds
     FROM window_events w JOIN devices d ON d.id = w.device_id
-    WHERE w.ts >= ? ${where}
+    WHERE w.ts >= ? ${where}${wh.clause}
     ORDER BY w.ts ASC`).all(...args);
   send(res, rows, format, `pulse-windows-${req.query.range || '24h'}`);
 });

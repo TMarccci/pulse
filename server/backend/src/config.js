@@ -1,8 +1,15 @@
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
+
+// Read our own version from package.json (used by the self-updater).
+let pkgVersion = '0.0.0';
+try {
+  pkgVersion = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version || '0.0.0';
+} catch { /* ignore */ }
 
 function int(name, def) {
   const v = process.env[name];
@@ -44,6 +51,20 @@ export const config = {
   bootstrapAdminUser: process.env.PULSE_ADMIN_USER || 'admin',
   bootstrapAdminPass: process.env.PULSE_ADMIN_PASS || '',
 
-  // GitHub repo the agent update-check advertises (owner/repo).
-  agentUpdateRepo: process.env.PULSE_AGENT_REPO || '',
+  // Pulse monorepo (owner/repo). Hardcoded default; both the agent update-check
+  // and the server self-updater use it. Override with PULSE_REPO if you fork.
+  repo: process.env.PULSE_REPO || process.env.PULSE_AGENT_REPO || 'TMarccci/pulse',
+
+  // This server's own version (from package.json).
+  version: pkgVersion,
+
+  // Auto-apply server updates when a newer server-v* release exists.
+  // Ignored inside Docker (update the image instead).
+  autoUpdate: bool('PULSE_AUTO_UPDATE', false),
+
+  // True when running inside the official container image.
+  inDocker: bool('PULSE_IN_DOCKER', false) || fs.existsSync('/.dockerenv'),
 };
+
+// Back-compat alias.
+config.agentUpdateRepo = config.repo;

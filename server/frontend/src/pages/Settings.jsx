@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Save, KeyRound, Copy, Ban, Check } from 'lucide-react';
+import { Plus, Trash2, Save, KeyRound, Copy, Ban, Check, ArrowUpCircle, RefreshCw } from 'lucide-react';
 import { api } from '../api.js';
 import { useFetch } from '../lib/useFetch.js';
 import { Spinner } from '../components/ui.jsx';
@@ -33,6 +33,13 @@ export default function Settings() {
 
   const update = (patch) => setS((prev) => ({ ...prev, ...patch }));
   const updateSync = (patch) => setS((prev) => ({ ...prev, sync: { ...prev.sync, ...patch } }));
+  const updateWork = (patch) => setS((prev) => ({ ...prev, workHours: { ...prev.workHours, ...patch } }));
+  const toggleDay = (d) => setS((prev) => {
+    const days = prev.workHours.days.includes(d)
+      ? prev.workHours.days.filter((x) => x !== d)
+      : [...prev.workHours.days, d].sort((a, b) => a - b);
+    return { ...prev, workHours: { ...prev.workHours, days } };
+  });
   const updateRule = (i, patch) => setS((prev) => {
     const colorRules = prev.colorRules.map((r, idx) => (idx === i ? { ...r, ...patch } : r));
     return { ...prev, colorRules };
@@ -76,6 +83,42 @@ export default function Settings() {
         <p className="text-xs text-[var(--color-muted)] mt-2">
           A second counts as <b>idle</b> after this many seconds without mouse or keyboard activity.
         </p>
+      </Section>
+
+      <Section title="Work hours"
+        desc="Focus analytics and exports on working time; activity outside these hours is filtered out.">
+        <label className="flex items-center gap-2 text-sm mb-4 cursor-pointer">
+          <input type="checkbox" checked={s.workHours.enabled}
+            onChange={(e) => updateWork({ enabled: e.target.checked })} />
+          Enable the work-hours filter
+        </label>
+        <div className={s.workHours.enabled ? '' : 'opacity-50 pointer-events-none'}>
+          <div className="flex items-end gap-4 flex-wrap">
+            <div>
+              <label className="label">Start</label>
+              <input type="time" className="input w-32" value={s.workHours.start}
+                onChange={(e) => updateWork({ start: e.target.value })} />
+            </div>
+            <div>
+              <label className="label">End</label>
+              <input type="time" className="input w-32" value={s.workHours.end}
+                onChange={(e) => updateWork({ end: e.target.value })} />
+            </div>
+          </div>
+          <label className="label mt-4">Work days</label>
+          <div className="flex gap-2 flex-wrap">
+            {[['Mon', 1], ['Tue', 2], ['Wed', 3], ['Thu', 4], ['Fri', 5], ['Sat', 6], ['Sun', 0]].map(([name, d]) => (
+              <button key={d} type="button" onClick={() => toggleDay(d)}
+                className={`btn py-1.5 px-3 ${s.workHours.days.includes(d) ? 'btn-primary' : ''}`}>
+                {name}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-[var(--color-muted)] mt-3">
+            Evaluated in the server's local timezone. Turn on “Work hours” on the Dashboard or a
+            device to apply the filter.
+          </p>
+        </div>
       </Section>
 
       <Section title="Sync mode" desc="How and when agents deliver data to the server.">
@@ -154,7 +197,69 @@ export default function Settings() {
       </Section>
 
       <EnrollmentKeys />
+      <ServerUpdates />
     </div>
+  );
+}
+
+function ServerUpdates() {
+  const { data, loading, reload } = useFetch('/updates', []);
+  const [busy, setBusy] = useState('');
+  const [msg, setMsg] = useState('');
+
+  async function check() {
+    setBusy('check'); setMsg('');
+    try { await api('/updates/check', { method: 'POST' }); reload(); }
+    finally { setBusy(''); }
+  }
+  async function apply() {
+    setBusy('apply'); setMsg('Downloading and applying update… the server will restart shortly.');
+    try { await api('/updates/apply', { method: 'POST' }); }
+    catch (e) { if (e.status !== 401) setMsg(`Update failed: ${e.data?.message || e.message}`); }
+    finally { setBusy(''); }
+  }
+
+  if (loading || !data) return null;
+
+  return (
+    <Section title="Server updates"
+      desc={`This Pulse Server checks ${data.repo} for new server-v* releases.`}
+      right={<button className="btn" onClick={check} disabled={busy === 'check'}>
+        <RefreshCw size={16} /> {busy === 'check' ? 'Checking…' : 'Check now'}
+      </button>}>
+      <div className="flex items-center gap-4 text-sm">
+        <div>
+          <div className="text-[var(--color-muted)] text-xs">Current</div>
+          <div className="font-medium">{data.current}</div>
+        </div>
+        <div>
+          <div className="text-[var(--color-muted)] text-xs">Latest</div>
+          <div className="font-medium">{data.latest || '—'}</div>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          {data.updateAvailable ? (
+            data.canApply ? (
+              <button className="btn btn-primary" onClick={apply} disabled={busy === 'apply'}>
+                <ArrowUpCircle size={16} /> {busy === 'apply' ? 'Updating…' : `Update to ${data.latest}`}
+              </button>
+            ) : (
+              <span className="chip" style={{ background: '#78350f', color: '#fde68a' }}>
+                Update via Docker image
+              </span>
+            )
+          ) : (
+            <span className="chip" style={{ background: '#064e3b', color: '#6ee7b7' }}>Up to date</span>
+          )}
+        </div>
+      </div>
+      {data.inDocker && (
+        <p className="text-xs text-[var(--color-muted)] mt-3">
+          Running in Docker — self-update is disabled; pull the new image to upgrade.
+        </p>
+      )}
+      {data.error && <p className="text-xs text-red-400 mt-2">Last check error: {data.error}</p>}
+      {msg && <p className="text-xs text-[var(--color-muted)] mt-2">{msg}</p>}
+    </Section>
   );
 }
 

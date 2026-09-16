@@ -49,14 +49,25 @@ jobs:
           name: PulseAgentSetup-${{ steps.ver.outputs.version }}
           path: installer/client/Output/PulseAgentSetup-${{ steps.ver.outputs.version }}.exe
 
-      - name: Publish GitHub Release
+      # Create the release as a DRAFT and attach the asset, then publish it.
+      # This is required for repos with Immutable Releases enabled (assets can't
+      # be added to an already-published/immutable release).
+      - name: Create draft release with installer
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: installer/client/Output/PulseAgentSetup-${{ steps.ver.outputs.version }}.exe
+          draft: true
+          tag_name: ${{ github.ref_name }}
           name: Pulse Agent ${{ steps.ver.outputs.version }}
+          files: installer/client/Output/PulseAgentSetup-${{ steps.ver.outputs.version }}.exe
           body: |
             Pulse Agent ${{ steps.ver.outputs.version }}
 
             Installed agents auto-update to this release when it is newer than
             their running version (self-update via GitHub Releases).
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit ${{ github.ref_name }} --draft=false --repo ${{ github.repository }}

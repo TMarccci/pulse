@@ -10,6 +10,7 @@
     <AssemblyName>PulseAgent</AssemblyName>
     <RootNamespace>PulseAgent</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\pulse.ico</ApplicationIcon>
 
     <!-- Versioning (bumped by the release pipeline from the git tag). -->
     <Version>0.1.0</Version>
