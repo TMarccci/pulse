@@ -200,7 +200,13 @@ cd /d "%~dp0"
 set PULSE_PORT=$Port
 set PULSE_DB=%~dp0data\pulse.db
 set TZ=$tz
+:loop
 "$node" src\index.js
+rem Exit code 1 = self-update requested a restart; relaunch on the new version.
+if errorlevel 1 (
+  timeout /t 3 /nobreak >nul
+  goto loop
+)
 "@ | Set-Content -Path $cmd -Encoding ASCII
 
   $action  = New-ScheduledTaskAction -Execute $cmd
