@@ -1,0 +1,28 @@
+# systemd unit for Pulse Server (Linux).
+# 1. Extract pulse-server-<ver>.zip to /opt/pulse-server
+# 2. Copy this file to /etc/systemd/system/pulse.service (edit paths/env)
+# 3. sudo systemctl daemon-reload && sudo systemctl enable --now pulse
+
+[Unit]
+Description=Pulse activity monitoring server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/pulse-server
+ExecStart=/usr/bin/node src/index.js
+Restart=on-failure
+RestartSec=5
+Environment=PULSE_PORT=8080
+Environment=PULSE_DB=/opt/pulse-server/data/pulse.db
+Environment=PULSE_SESSION_TTL_MIN=60
+Environment=PULSE_ONLINE_WINDOW_SEC=120
+# Set once for first-run bootstrap, then remove:
+# Environment=PULSE_ADMIN_USER=admin
+# Environment=PULSE_ADMIN_PASS=change-me
+# Environment=PULSE_AGENT_REPO=your-org/pulse
+User=pulse
+Group=pulse
+
+[Install]
+WantedBy=multi-user.target

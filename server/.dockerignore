@@ -1,0 +1,7 @@
+**/node_modules
+backend/data
+backend/public
+backend/*.db
+backend/*.db-*
+frontend/dist
+**/*.log

@@ -1,0 +1,88 @@
+# Pulse
+
+Consent-based workplace activity monitoring: a hidden Windows **agent** that reports
+to a central **sync server** with a modern web dashboard.
+
+> ⚠️ **Authorized use only.** Deploy Pulse only on devices you are legally permitted
+> to monitor and only with the informed consent of the people using them. A
+> worker-notice template is provided in [`docs/worker-notice-template.md`](docs/worker-notice-template.md).
+> Monitoring people without a lawful basis and their knowledge may be illegal in your
+> jurisdiction.
+
+---
+
+## What it does
+
+**Agent (per workstation, hidden):**
+- Focused window title + application name
+- Total key presses
+- Mouse active vs. idle time (idle threshold configurable centrally)
+- No taskbar entry, no tray icon, starts with Windows, self-updates from GitHub Releases,
+  and registers in *Add/Remove Programs*.
+
+**Server + dashboard:**
+- Workplace-wide and per-device analytics
+- **Devices** screen — nickname, details, archive
+- **Office** screen — drag monitor icons on a canvas, colour-coded by status with
+  fully customizable colour rules
+- **Settings** — idle threshold, sync mode (live/timed), colour rules, enrollment keys,
+  agent update floor
+- Data export in CSV / Excel / JSON
+- Admin login with an expiring session + CSRF token (auto-logout on expiry)
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design.
+
+## Repository layout
+
+```
+agent/       C#/.NET 10 Windows agent (WPF config + hidden monitor)
+server/
+  backend/   Node.js/Express API + SQLite (node:sqlite, no native deps)
+  frontend/  React + Vite + Tailwind dashboard (builds into backend/public)
+installer/
+  client/    Inno Setup script for the agent installer
+  server/    Windows-service (WinSW) + systemd deployment
+scripts/     build-agent.ps1, build-server.ps1
+.github/     CI + release pipelines
+docs/        architecture, server, agent, build, API, deployment, worker notice
+```
+
+## Quick start (development)
+
+**Server** (two terminals):
+
+```bash
+cd server/backend
+npm install
+PULSE_ADMIN_USER=admin PULSE_ADMIN_PASS=secret123 npm run dev
+```
+
+```bash
+cd server/frontend
+npm install
+npm run dev        # http://localhost:5173 (proxies /api to :8080)
+```
+
+Optional demo data: `cd server/backend && node src/demo.js` (creates `admin` / `secret123`).
+
+**Agent** (build + run on a Windows box):
+
+```bash
+cd agent
+dotnet build PulseAgent.slnx -c Debug
+# run bin/Debug/net10.0-windows/win-x64/PulseAgent.exe  → shows the config window
+```
+
+## Production
+
+- **Server:** `docker compose up -d` (see [`docs/SERVER.md`](docs/SERVER.md)), or the
+  zip + Windows-service / systemd install under [`installer/server`](installer/server).
+- **Agent:** build the installer with `pwsh scripts/build-agent.ps1 -Version X.Y.Z`
+  (needs [Inno Setup](https://jrsoftware.org/isdl.php)), then run
+  `PulseAgentSetup-X.Y.Z.exe` on each workstation. See [`docs/AGENT.md`](docs/AGENT.md).
+
+## Releases & auto-update
+
+Tag `server-vX.Y.Z` or `agent-vX.Y.Z` to trigger the release pipelines
+([`docs/BUILD.md`](docs/BUILD.md)). Agents poll the configured GitHub repo's Releases
+and silently install any newer signed installer.

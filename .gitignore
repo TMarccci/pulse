@@ -1,0 +1,33 @@
+# ---- Node / server ----
+node_modules/
+server/backend/data/
+server/backend/*.db
+server/backend/*.db-*
+server/frontend/dist/
+server/backend/public/
+*.log
+.env
+.env.local
+
+# ---- .NET / agent ----
+[Bb]in/
+[Oo]bj/
+*.user
+agent/**/publish/
+
+# ---- Build output ----
+dist/
+out/
+artifacts/
+installer/**/Output/
+*.exe.config
+
+# ---- Editor ----
+.vs/
+.vscode/
+*.suo
+.idea/
+
+# ---- OS ----
+Thumbs.db
+.DS_Store

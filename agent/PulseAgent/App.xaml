@@ -1,0 +1,32 @@
+<Application x:Class="PulseAgent.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <SolidColorBrush x:Key="Bg" Color="#0B1020" />
+        <SolidColorBrush x:Key="Surface" Color="#131A2E" />
+        <SolidColorBrush x:Key="Border" Color="#263153" />
+        <SolidColorBrush x:Key="Text" Color="#E7ECF7" />
+        <SolidColorBrush x:Key="Muted" Color="#8792AD" />
+        <SolidColorBrush x:Key="Brand" Color="#6366F1" />
+
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource Bg}" />
+            <Setter Property="Foreground" Value="{StaticResource Text}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CaretBrush" Value="{StaticResource Text}" />
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter Property="Background" Value="{StaticResource Bg}" />
+            <Setter Property="Foreground" Value="{StaticResource Text}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CaretBrush" Value="{StaticResource Text}" />
+        </Style>
+    </Application.Resources>
+</Application>

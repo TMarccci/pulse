@@ -1,0 +1,23 @@
+services:
+  pulse:
+    build:
+      context: ./server
+    image: pulse-server:latest
+    container_name: pulse-server
+    ports:
+      - "${PULSE_PORT:-8080}:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      # First-run bootstrap admin (change the password!).
+      PULSE_ADMIN_USER: "${PULSE_ADMIN_USER:-admin}"
+      PULSE_ADMIN_PASS: "${PULSE_ADMIN_PASS:-}"
+      # Session / CSRF token lifetime in minutes.
+      PULSE_SESSION_TTL_MIN: "${PULSE_SESSION_TTL_MIN:-60}"
+      # Seconds of silence before a device is shown offline.
+      PULSE_ONLINE_WINDOW_SEC: "${PULSE_ONLINE_WINDOW_SEC:-120}"
+      # Set true when running behind an HTTPS reverse proxy.
+      PULSE_SECURE_COOKIES: "${PULSE_SECURE_COOKIES:-false}"
+      # GitHub repo (owner/repo) advertised to agents for self-update.
+      PULSE_AGENT_REPO: "${PULSE_AGENT_REPO:-}"
+    restart: unless-stopped

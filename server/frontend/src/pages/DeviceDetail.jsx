@@ -1,0 +1,117 @@
+import { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from 'recharts';
+import { ArrowLeft, Keyboard, MousePointer2, Clock, Trash2, AppWindow } from 'lucide-react';
+import { useFetch } from '../lib/useFetch.js';
+import { api } from '../api.js';
+import { StatCard, RangePicker, Spinner, Chip, Empty } from '../components/ui.jsx';
+import { ExportMenu } from '../components/ExportMenu.jsx';
+import { fmtNumber, fmtDuration, fmtClock, relativeTime, bucketLabel } from '../lib/format.js';
+
+const chartAxis = { stroke: '#8792ad', fontSize: 12 };
+const tooltipStyle = { background: '#131a2e', border: '1px solid #263153', borderRadius: 8, fontSize: 12, color: '#e7ecf7' };
+
+export default function DeviceDetail() {
+  const { id } = useParams();
+  const nav = useNavigate();
+  const [range, setRange] = useState('24h');
+  const info = useFetch(`/devices/${id}`, [id], 20000);
+  const analytics = useFetch(`/analytics/device/${id}?range=${range}`, [id, range], 30000);
+
+  const d = info.data?.device;
+  const series = (analytics.data?.series || []).map((s) => ({
+    ...s, label: bucketLabel(s.bucket, range), mouseActiveMin: Math.round(s.mouseActiveSec / 60),
+  }));
+  const topApps = (analytics.data?.topApps || []).map((a) => ({ ...a, minutes: Math.round(a.seconds / 60) }));
+
+  async function remove() {
+    if (!confirm('Permanently delete this device and all its collected data? This cannot be undone.')) return;
+    await api(`/devices/${id}`, { method: 'DELETE' });
+    nav('/devices');
+  }
+
+  if (info.loading && !d) return <Spinner />;
+  if (!d) return <Empty>Device not found. <Link className="underline" to="/devices">Back to devices</Link></Empty>;
+
+  const totals = info.data?.last24h;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <Link to="/devices" className="btn py-1.5 px-2"><ArrowLeft size={16} /></Link>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold">{d.displayName}</h1>
+              <Chip color={d.status.color}>{d.status.label}</Chip>
+            </div>
+            <p className="text-sm text-[var(--color-muted)]">
+              {d.deviceName} · {d.hostname || '—'} · {d.os || '—'} · agent {d.agentVersion || '—'}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <RangePicker value={range} onChange={setRange} />
+          <ExportMenu kind="samples" params={{ deviceId: id, range }} />
+          <button className="btn btn-danger" onClick={remove}><Trash2 size={16} /> Delete</button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Keyboard} label="Keypresses (24h)" accent="#818cf8" value={fmtNumber(totals?.keypresses)} />
+        <StatCard icon={MousePointer2} label="Active (24h)" accent="#22c55e" value={fmtDuration(totals?.mouse_active_sec)} />
+        <StatCard icon={Clock} label="Idle (24h)" accent="#eab308" value={fmtDuration(totals?.mouse_idle_sec)} />
+        <StatCard icon={AppWindow} label="Last seen" accent="#6366f1"
+          value={relativeTime(d.lastSeenAt)} sub={fmtClock(d.lastSeenAt)} />
+      </div>
+
+      {d.lastWindow && (
+        <div className="card p-4 flex items-center gap-3">
+          <AppWindow size={18} className="text-[var(--color-brand)]" />
+          <div>
+            <div className="text-xs text-[var(--color-muted)]">Last foreground window</div>
+            <div className="font-medium">{d.lastWindow.app} <span className="text-[var(--color-muted)]">— {d.lastWindow.title}</span></div>
+          </div>
+        </div>
+      )}
+
+      <div className="card p-4">
+        <div className="text-sm font-medium mb-3">Activity over time</div>
+        {series.length ? (
+          <ResponsiveContainer width="100%" height={260}>
+            <AreaChart data={series} margin={{ left: -18, right: 8, top: 4 }}>
+              <defs>
+                <linearGradient id="dKeys" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="#263153" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" {...chartAxis} tickLine={false} />
+              <YAxis {...chartAxis} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Area type="monotone" dataKey="keypresses" name="Keypresses" stroke="#6366f1" fill="url(#dKeys)" strokeWidth={2} />
+              <Area type="monotone" dataKey="mouseActiveMin" name="Active (min)" stroke="#22c55e" fill="none" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : <Empty>No activity in this range.</Empty>}
+      </div>
+
+      <div className="card p-4">
+        <div className="text-sm font-medium mb-3">Top applications (minutes)</div>
+        {topApps.length ? (
+          <ResponsiveContainer width="100%" height={Math.max(160, topApps.length * 30)}>
+            <BarChart data={topApps} layout="vertical" margin={{ left: 40, right: 16 }}>
+              <XAxis type="number" {...chartAxis} tickLine={false} axisLine={false} />
+              <YAxis type="category" dataKey="app" {...chartAxis} width={120} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#ffffff08' }} />
+              <Bar dataKey="minutes" name="Minutes" fill="#818cf8" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : <Empty>No window activity recorded.</Empty>}
+      </div>
+    </div>
+  );
+}

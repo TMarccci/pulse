@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  agent:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build agent
+        run: dotnet build agent/PulseAgent.slnx -c Release --nologo
+
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Backend deps + smoke import
+        working-directory: server/backend
+        run: |
+          npm ci --no-audit --no-fund
+          node --check src/index.js
+      - name: Frontend build
+        working-directory: server/frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
