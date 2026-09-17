@@ -30,7 +30,9 @@ to a central **sync server** with a modern web dashboard.
 - Data export in CSV / Excel / JSON
 - Admin login with an expiring session + CSRF token (auto-logout on expiry)
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, and
+[`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) for RAM/CPU/network/storage usage and
+capacity planning.
 
 ## Repository layout
 
@@ -44,7 +46,7 @@ installer/
   server/    Windows-service (WinSW) + systemd deployment
 scripts/     build-agent.ps1, build-server.ps1
 .github/     CI + release pipelines
-docs/        architecture, server, agent, build, API, deployment, worker notice
+docs/        architecture, server, agent, build, API, deployment, performance, worker notice
 ```
 
 ## Quick start (development)

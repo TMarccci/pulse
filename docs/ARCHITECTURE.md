@@ -84,6 +84,9 @@ See [SERVER.md](SERVER.md) and [API.md](API.md).
 | `settings`       | singleton JSON blob of monitoring rules / modes / color rules      |
 | `audit_log`      | admin actions                                                      |
 
+For per-record sizes, database growth, network traffic, and RAM/CPU figures, see
+[PERFORMANCE.md](PERFORMANCE.md).
+
 ## 5. Sync protocol (summary)
 
 ```

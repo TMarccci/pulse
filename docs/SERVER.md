@@ -3,6 +3,9 @@
 Node.js/Express API + React dashboard, backed by SQLite via the built-in
 `node:sqlite` module (Node **22.5+**, no native build step).
 
+For sizing (database growth, network load, RAM/CPU), see
+[PERFORMANCE.md](PERFORMANCE.md).
+
 ## Environment variables
 
 | Variable                  | Default            | Purpose                                             |

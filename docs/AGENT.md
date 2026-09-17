@@ -53,6 +53,13 @@ stops the running agent, removes the autostart entry, and deletes `%LOCALAPPDATA
 Delete `%LOCALAPPDATA%\Pulse\config.json` and relaunch the agent to show the config
 window again (e.g. to re-point it at a new server).
 
+## Resource usage
+
+~80–150 MB RAM (~100 MB typical, normal for a self-contained .NET + WPF app),
+~0% CPU at idle, and a spool that stays a few MB even when the server is
+unreachable for days. Full figures and network traffic are in
+[PERFORMANCE.md](PERFORMANCE.md).
+
 ## Notes on hooks & antivirus
 
 The agent uses global low-level keyboard/mouse hooks (`SetWindowsHookEx`). Some EDR/AV
