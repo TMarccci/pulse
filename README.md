@@ -3,6 +3,8 @@
 Consent-based workplace activity monitoring: a hidden Windows **agent** that reports
 to a central **sync server** with a modern web dashboard.
 
+*🇭🇺 Magyar dokumentáció: [README.hu.md](README.hu.md) · [docs/hu/](docs/hu/).*
+
 > ⚠️ **Authorized use only.** Deploy Pulse only on devices you are legally permitted
 > to monitor and only with the informed consent of the people using them. A
 > worker-notice template is provided in [`docs/worker-notice-template.md`](docs/worker-notice-template.md).
