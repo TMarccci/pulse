@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, ExternalLink, X } from 'lucide-react';
+import { RefreshCw, ExternalLink, X, Info } from 'lucide-react';
 import { useFetch } from '../lib/useFetch.js';
 import { api } from '../api.js';
 import { OfficeNode, MonitorIcon } from '../components/MonitorIcon.jsx';
@@ -82,6 +82,19 @@ export default function Office() {
           </div>
         </div>
       </div>
+
+      {/* Timed-sync notice */}
+      {settings.data?.settings?.sync?.mode === 'timed' && (
+        <div className="card p-3 flex items-start gap-2 text-xs" style={{ borderColor: '#f59e0b66' }}>
+          <Info size={15} className="text-amber-400 mt-0.5 shrink-0" />
+          <span>
+            <b className="text-amber-400">Timed sync is enabled.</b> Workstations upload once a day
+            (around {settings.data.settings.sync.timedAt}), so a device shown offline/grey here may
+            simply not have synced yet today rather than being truly offline. Switch to Live sync in
+            Settings for real-time status.
+          </span>
+        </div>
+      )}
 
       {/* Legend */}
       <div className="card p-3 flex items-center gap-4 flex-wrap text-xs">

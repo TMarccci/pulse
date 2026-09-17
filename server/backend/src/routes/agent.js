@@ -46,10 +46,11 @@ agentRouter.post('/sync', requireDevice, (req, res) => {
   const device = req.device;
 
   const upsertSample = db.prepare(`
-    INSERT INTO samples (device_id, ts, keypresses, mouse_active_sec, mouse_idle_sec, top_app, top_title)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO samples (device_id, ts, keypresses, mouse_clicks, mouse_active_sec, mouse_idle_sec, top_app, top_title)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(device_id, ts) DO UPDATE SET
       keypresses       = excluded.keypresses,
+      mouse_clicks     = excluded.mouse_clicks,
       mouse_active_sec = excluded.mouse_active_sec,
       mouse_idle_sec   = excluded.mouse_idle_sec,
       top_app          = excluded.top_app,
@@ -74,6 +75,7 @@ agentRouter.post('/sync', requireDevice, (req, res) => {
         device.id,
         ts,
         Math.max(0, Math.trunc(b.keypresses || 0)),
+        Math.max(0, Math.trunc(b.mouseClicks || 0)),
         Math.max(0, Math.trunc(b.mouseActiveSec || 0)),
         Math.max(0, Math.trunc(b.mouseIdleSec || 0)),
         top?.app || null,

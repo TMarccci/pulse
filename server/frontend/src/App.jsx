@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import Office from './pages/Office.jsx';
 import Devices from './pages/Devices.jsx';
 import DeviceDetail from './pages/DeviceDetail.jsx';
+import Users from './pages/Users.jsx';
 import Settings from './pages/Settings.jsx';
 import { Spinner } from './components/ui.jsx';
 
@@ -20,6 +21,7 @@ function Gate() {
         <Route path="/office" element={<Office />} />
         <Route path="/devices" element={<Devices />} />
         <Route path="/devices/:id" element={<DeviceDetail />} />
+        <Route path="/users" element={<Users />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

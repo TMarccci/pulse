@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS samples (
   device_id        TEXT NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
   ts               INTEGER NOT NULL,       -- bucket start (unix seconds, minute-aligned)
   keypresses       INTEGER NOT NULL DEFAULT 0,
+  mouse_clicks     INTEGER NOT NULL DEFAULT 0,
   mouse_active_sec INTEGER NOT NULL DEFAULT 0,
   mouse_idle_sec   INTEGER NOT NULL DEFAULT 0,
   top_app          TEXT,
@@ -104,6 +105,20 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at INTEGER NOT NULL
 );
 `);
+
+// ---- Migrations -----------------------------------------------------------
+// `CREATE TABLE IF NOT EXISTS` above covers brand-new tables on upgrade. For new
+// COLUMNS on existing tables we add them idempotently here, so an old database
+// migrates forward automatically when the server updates.
+export function ensureColumn(table, column, definition) {
+  const exists = db.prepare('SELECT 1 FROM pragma_table_info(?) WHERE name = ?').get(table, column);
+  if (!exists) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    console.log(`[pulse] Migrated: added ${table}.${column}`);
+  }
+}
+
+ensureColumn('samples', 'mouse_clicks', 'INTEGER NOT NULL DEFAULT 0');
 
 // ---- Default monitoring settings ------------------------------------------
 export const DEFAULT_SETTINGS = {

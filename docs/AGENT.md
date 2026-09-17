@@ -20,6 +20,8 @@ A self-contained (no runtime prerequisite) Windows 10/11 background app.
 
 - Foreground window **title** and **application** (e.g. `chrome.exe`)
 - **Key press count** (counts only — no keystroke content is captured)
+- **Mouse click count** — any button-down (left/right/middle/side) counts as one click;
+  positions and buttons are not distinguished or stored
 - **Mouse active/idle seconds** — a second is *idle* after `idleThresholdSeconds`
   (default 30) without mouse activity; the threshold is set centrally in Settings.
 

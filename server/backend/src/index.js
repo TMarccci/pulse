@@ -12,6 +12,7 @@ import { analyticsRouter } from './routes/analytics.js';
 import { settingsRouter } from './routes/settings.js';
 import { exportRouter } from './routes/export.js';
 import { updatesRouter } from './routes/updates.js';
+import { usersRouter } from './routes/users.js';
 import { startUpdateChecker } from './services/updater.js';
 
 const app = express();
@@ -40,6 +41,7 @@ app.use('/api/analytics', analyticsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/updates', updatesRouter);
+app.use('/api/users', usersRouter);
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 

@@ -56,8 +56,9 @@ public sealed class ActivityCollector : IDisposable
                     _current = new LiveBucket(minute);
                 }
 
-                // Keypresses accumulated since the last tick.
+                // Keypresses + mouse clicks accumulated since the last tick.
                 _current.Keypresses += _keyboard.TakeCount();
+                _current.MouseClicks += _mouse.TakeClicks();
 
                 // Active vs. idle second, by mouse inactivity threshold.
                 if (_mouse.SecondsSinceActivity <= _idleThresholdSeconds)

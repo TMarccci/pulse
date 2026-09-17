@@ -47,6 +47,7 @@ devicesRouter.get('/:id', (req, res) => {
   const since = now() - 24 * 3600;
   const totals = db.prepare(`
     SELECT COALESCE(SUM(keypresses),0) AS keypresses,
+           COALESCE(SUM(mouse_clicks),0) AS mouse_clicks,
            COALESCE(SUM(mouse_active_sec),0) AS mouse_active_sec,
            COALESCE(SUM(mouse_idle_sec),0) AS mouse_idle_sec
     FROM samples WHERE device_id = ? AND ts >= ?`).get(d.id, since);

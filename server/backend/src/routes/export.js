@@ -8,16 +8,16 @@ import { workHoursClause } from '../services/workhours.js';
 export const exportRouter = Router();
 exportRouter.use(requireAdmin);
 
-function rangeSince(str) {
+// Resolve an export window from explicit from/to (unix seconds) or a range preset.
+function resolveWindow(query) {
   const t = now();
-  switch (str) {
-    case '1h':  return t - 3600;
-    case '7d':  return t - 7 * 86400;
-    case '30d': return t - 30 * 86400;
-    case 'all': return 0;
-    case '24h':
-    default:    return t - 86400;
-  }
+  const from = parseInt(query.from, 10);
+  const to = parseInt(query.to, 10);
+  if (Number.isFinite(from) && Number.isFinite(to) && to > from) return { since: from, until: to };
+  const since = {
+    '1h': t - 3600, '7d': t - 7 * 86400, '30d': t - 30 * 86400, all: 0,
+  }[query.range] ?? t - 86400;
+  return { since, until: t };
 }
 
 function toCsv(rows) {
@@ -54,38 +54,38 @@ function send(res, rows, format, name) {
 // /api/export/samples?format=csv|json|xlsx&deviceId=&range=24h|7d|30d|all
 exportRouter.get('/samples', (req, res) => {
   const format = String(req.query.format || 'csv');
-  const since = rangeSince(req.query.range);
+  const { since, until } = resolveWindow(req.query);
   const deviceId = req.query.deviceId;
   const where = deviceId ? 'AND s.device_id = ?' : '';
-  const args = deviceId ? [since, deviceId] : [since];
+  const args = deviceId ? [since, until, deviceId] : [since, until];
   const wh = workHoursClause(getSettings(), req.query.workHours === '1', 's.ts');
   const rows = db.prepare(`
     SELECT d.device_name AS device, COALESCE(d.nickname,'') AS nickname,
            datetime(s.ts,'unixepoch') AS time_utc, s.ts AS unix,
-           s.keypresses, s.mouse_active_sec, s.mouse_idle_sec,
+           s.keypresses, s.mouse_clicks, s.mouse_active_sec, s.mouse_idle_sec,
            COALESCE(s.top_app,'') AS top_app, COALESCE(s.top_title,'') AS top_title
     FROM samples s JOIN devices d ON d.id = s.device_id
-    WHERE s.ts >= ? ${where}${wh.clause}
+    WHERE s.ts >= ? AND s.ts < ? ${where}${wh.clause}
     ORDER BY s.ts ASC`).all(...args);
-  send(res, rows, format, `pulse-samples-${req.query.range || '24h'}`);
+  send(res, rows, format, `pulse-samples-${req.query.range || 'custom'}`);
 });
 
 // /api/export/windows?...
 exportRouter.get('/windows', (req, res) => {
   const format = String(req.query.format || 'csv');
-  const since = rangeSince(req.query.range);
+  const { since, until } = resolveWindow(req.query);
   const deviceId = req.query.deviceId;
   const where = deviceId ? 'AND w.device_id = ?' : '';
-  const args = deviceId ? [since, deviceId] : [since];
+  const args = deviceId ? [since, until, deviceId] : [since, until];
   const wh = workHoursClause(getSettings(), req.query.workHours === '1', 'w.ts');
   const rows = db.prepare(`
     SELECT d.device_name AS device, COALESCE(d.nickname,'') AS nickname,
            datetime(w.ts,'unixepoch') AS time_utc,
            COALESCE(w.app,'') AS app, COALESCE(w.title,'') AS title, w.seconds
     FROM window_events w JOIN devices d ON d.id = w.device_id
-    WHERE w.ts >= ? ${where}${wh.clause}
+    WHERE w.ts >= ? AND w.ts < ? ${where}${wh.clause}
     ORDER BY w.ts ASC`).all(...args);
-  send(res, rows, format, `pulse-windows-${req.query.range || '24h'}`);
+  send(res, rows, format, `pulse-windows-${req.query.range || 'custom'}`);
 });
 
 // /api/export/devices?format=

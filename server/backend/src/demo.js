@@ -29,8 +29,8 @@ const insDev = db.prepare(`INSERT INTO devices
   (id, token_hash, device_name, nickname, hostname, os, agent_version, canvas_x, canvas_y, created_at, last_seen_at, last_window_app, last_window_title)
   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`);
 const insSample = db.prepare(`INSERT INTO samples
-  (device_id, ts, keypresses, mouse_active_sec, mouse_idle_sec, top_app, top_title)
-  VALUES (?,?,?,?,?,?,?) ON CONFLICT(device_id,ts) DO NOTHING`);
+  (device_id, ts, keypresses, mouse_clicks, mouse_active_sec, mouse_idle_sec, top_app, top_title)
+  VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(device_id,ts) DO NOTHING`);
 const insWin = db.prepare('INSERT INTO window_events (device_id, ts, app, title, seconds) VALUES (?,?,?,?,?)');
 
 names.forEach(([nick, host], i) => {
@@ -48,9 +48,10 @@ names.forEach(([nick, host], i) => {
     const busy = workingHour >= 8 && workingHour <= 18 ? 1 : 0.15;
     const active = Math.random() < 0.75 * busy;
     const keys = active ? Math.floor(Math.random() * 180 * busy) : 0;
+    const clicks = active ? Math.floor(Math.random() * 40 * busy) : 0;
     const activeSec = active ? 40 + Math.floor(Math.random() * 20) : 0;
     const [a, ti] = apps[Math.floor(Math.random() * apps.length)];
-    insSample.run(id, ts, keys, activeSec, 60 - activeSec, a, ti);
+    insSample.run(id, ts, keys, clicks, activeSec, 60 - activeSec, a, ti);
     if (active) insWin.run(id, ts, a, ti, activeSec);
   }
 });

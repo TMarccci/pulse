@@ -55,6 +55,7 @@ public sealed class BucketDto
 {
     public long Ts { get; set; }
     public long Keypresses { get; set; }
+    public long MouseClicks { get; set; }
     public int MouseActiveSec { get; set; }
     public int MouseIdleSec { get; set; }
     public List<WindowDto> Windows { get; set; } = new();

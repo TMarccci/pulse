@@ -7,6 +7,7 @@ internal sealed class LiveBucket
 {
     public long Ts { get; }
     public long Keypresses { get; set; }
+    public long MouseClicks { get; set; }
     public int MouseActiveSec { get; set; }
     public int MouseIdleSec { get; set; }
     private readonly Dictionary<(string app, string title), int> _windows = new();
@@ -23,6 +24,7 @@ internal sealed class LiveBucket
     {
         Ts = Ts,
         Keypresses = Keypresses,
+        MouseClicks = MouseClicks,
         MouseActiveSec = MouseActiveSec,
         MouseIdleSec = MouseIdleSec,
         Windows = _windows

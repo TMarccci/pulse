@@ -2,7 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Map, MonitorSmartphone, Settings as SettingsIcon,
-  Activity, LogOut,
+  Activity, LogOut, Users as UsersIcon, Github, Globe, Mail, Heart,
 } from 'lucide-react';
 import { useAuth } from '../auth.jsx';
 import { UpdateBanner } from './UpdateBanner.jsx';
@@ -11,8 +11,28 @@ const nav = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/office', label: 'Office', icon: Map },
   { to: '/devices', label: 'Devices', icon: MonitorSmartphone },
+  { to: '/users', label: 'Users', icon: UsersIcon },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
+
+function AuthorCredit() {
+  return (
+    <div className="px-1 pb-3 mb-3 border-b border-[var(--color-border)]">
+      <div className="text-[11px] text-[var(--color-muted)] flex items-center gap-1">
+        Made with <Heart size={11} className="text-rose-500 fill-rose-500" /> by
+        <span className="text-[var(--color-text)] font-medium">TMarccci</span>
+      </div>
+      <div className="flex items-center gap-3 mt-2 text-[var(--color-muted)]">
+        <a href="https://github.com/TMarccci/pulse" target="_blank" rel="noreferrer"
+          title="GitHub repository" className="hover:text-[var(--color-text)]"><Github size={16} /></a>
+        <a href="https://tmarccci.hu" target="_blank" rel="noreferrer"
+          title="tmarccci.hu" className="hover:text-[var(--color-text)]"><Globe size={16} /></a>
+        <a href="mailto:contact@tmarccci.hu"
+          title="contact@tmarccci.hu" className="hover:text-[var(--color-text)]"><Mail size={16} /></a>
+      </div>
+    </div>
+  );
+}
 
 function SessionCountdown({ expiresAt }) {
   const [left, setLeft] = useState(0);
@@ -58,6 +78,7 @@ export default function Layout() {
           ))}
         </nav>
         <div className="mt-auto p-3 border-t border-[var(--color-border)]">
+          <AuthorCredit />
           <div className="text-xs text-[var(--color-muted)] mb-2 px-1">
             Signed in as <span className="text-[var(--color-text)]">{user?.username}</span>
           </div>

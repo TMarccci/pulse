@@ -9,6 +9,7 @@ export function useFetch(path, deps = [], pollMs = 0) {
   const first = useRef(true);
 
   const load = useCallback(async (silent) => {
+    if (!path) { setData(null); setLoading(false); return; } // skip when disabled
     if (!silent) setLoading(true);
     try {
       const d = await api(path);

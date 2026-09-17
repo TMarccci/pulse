@@ -35,3 +35,10 @@ export function bucketLabel(unixSeconds, range) {
   }
   return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
+
+// Label an x-axis bucket from the actual bucket size (seconds).
+export function labelForBucket(unixSeconds, bucketSeconds) {
+  const d = new Date(unixSeconds * 1000);
+  if (bucketSeconds >= 86400) return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+}

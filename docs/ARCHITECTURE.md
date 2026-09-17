@@ -87,6 +87,13 @@ See [SERVER.md](SERVER.md) and [API.md](API.md).
 For per-record sizes, database growth, network traffic, and RAM/CPU figures, see
 [PERFORMANCE.md](PERFORMANCE.md).
 
+**Schema migrations.** On startup `db.js` runs `CREATE TABLE IF NOT EXISTS` for every
+table (new tables in an update are created automatically) and an idempotent
+`ensureColumn(table, column, def)` for each added column (it checks
+`pragma_table_info` and runs `ALTER TABLE … ADD COLUMN` only if missing). So upgrading
+a server to a version with new tables *or* new fields migrates an existing database
+forward automatically, without data loss.
+
 ## 5. Sync protocol (summary)
 
 ```

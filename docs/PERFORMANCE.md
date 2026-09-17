@@ -21,7 +21,12 @@ size deployments. Figures are derived from the actual data model (`samples`,
 ## Unit cost of one monitored minute
 
 Each minute the agent runs produces **1 `sample`** plus **one `window_events`
-row per distinct focused window that minute** (`W`).
+row per distinct focused window that minute** (`W`). A sample carries the keypress
+count, **mouse-click count**, and active/idle seconds.
+
+> **Mouse-click tracking** adds one integer per `sample` (a few bytes) and one extra
+> interlocked increment in the existing mouse hook per click — no measurable change to
+> RAM, CPU, disk, or network. The figures below are unaffected.
 
 | Where | Per minute (W = 2) |
 |---|---|

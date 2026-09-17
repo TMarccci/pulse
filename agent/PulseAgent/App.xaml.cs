@@ -122,7 +122,7 @@ public partial class App : Application
             {
                 AgentVersion = AppInfo.Version,
                 Buckets = new() { new BucketDto {
-                    Ts = ts, Keypresses = 42, MouseActiveSec = 50, MouseIdleSec = 10,
+                    Ts = ts, Keypresses = 42, MouseClicks = 17, MouseActiveSec = 50, MouseIdleSec = 10,
                     Windows = new() { new WindowDto { App = "selftest.exe", Title = "QA", Seconds = 50 } } } },
             });
             W($"SYNC OK serverTime={res.ServerTime} mode={res.Settings?.Sync.Mode}");
