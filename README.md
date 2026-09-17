@@ -15,20 +15,28 @@ to a central **sync server** with a modern web dashboard.
 
 **Agent (per workstation, hidden):**
 - Focused window title + application name
-- Total key presses
+- Total key presses and **mouse clicks**
 - Mouse active vs. idle time (idle threshold configurable centrally)
+- Captures **remote sessions** (RDP / VPN / TeamViewer / AnyDesk …) that drive the PC —
+  see [remote & home-office scenarios](docs/AGENT.md#remote--home-office-scenarios)
 - No taskbar entry, no tray icon, starts with Windows, self-updates from GitHub Releases,
   and registers in *Add/Remove Programs*.
 
 **Server + dashboard:**
-- Workplace-wide and per-device analytics
+- Workplace-wide and per-device analytics, over presets **or a specific day / custom
+  date interval**, with keyboard/mouse-activity and active/idle charts
 - **Devices** screen — nickname, details, archive
-- **Office** screen — drag monitor icons on a canvas, colour-coded by status with
-  fully customizable colour rules
+- **Device drill-down** — click an app to see its window titles on a timeline, plus a
+  full foreground-window timeline
+- **Office** screen — drag monitor icons on a canvas, colour-coded by status with fully
+  customizable colour rules (and a timed-sync notice)
+- **Users** — add dashboard accounts and change passwords
 - **Settings** — idle threshold, **work hours** (focus analytics on working time),
   sync mode (live/timed), colour rules, enrollment keys, agent update floor
 - Data export in CSV / Excel / JSON
+- **Server self-update** from GitHub Releases (Settings → Server updates)
 - Admin login with an expiring session + CSRF token (auto-logout on expiry)
+- Automatic **schema migrations** on upgrade (new tables and columns)
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, and
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) for RAM/CPU/network/storage usage and

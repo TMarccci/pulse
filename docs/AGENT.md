@@ -62,6 +62,38 @@ window again (e.g. to re-point it at a new server).
 unreachable for days. Full figures and network traffic are in
 [PERFORMANCE.md](PERFORMANCE.md).
 
+## Remote & home-office scenarios
+
+What Pulse captures depends on **which machine the work actually runs on**.
+
+**Remote *into* the monitored PC — captured.** When someone connects to the work
+machine via **RDP, VPN + RDP, TeamViewer, AnyDesk, VNC, or Chrome Remote Desktop**, the
+work executes on the monitored machine and the home device is just a screen + keyboard.
+The agent runs inside that user session, and remote input is injected into the session's
+input stream below the hook level — so the low-level keyboard/mouse hooks still count
+every keypress and click, active/idle still works, and `GetForegroundWindow` still
+reports the focused app/title. It records exactly as if the person were at the desk.
+
+**Work on a device *without* the agent — not captured.** Pulse only sees machines where
+the agent is installed. If the work happens on a personal laptop with no agent, install
+the agent there too (with consent) to cover it.
+
+**Company laptop taken home.** Activity is captured locally and spooled (up to ~14 days);
+it uploads whenever the laptop can reach the server. For real remote coverage the server
+must be reachable from outside — via **VPN** or a **public HTTPS** deployment — otherwise
+the data waits in the spool and syncs when the device is back on the network.
+
+Caveats:
+- **Per-user install** — a *different* Windows account signing in (locally or via RDP)
+  isn't monitored unless the agent is also installed for that account.
+- **Multi-user hosts (Windows Server / RDS)** — each user gets their own session; install
+  the agent per monitored user (the single-instance guard is per-session, so multiple
+  sessions each run their own agent).
+- **Locked / disconnected sessions** produce no activity (correct — nobody is working);
+  it resumes on reconnect.
+- **UAC / secure-desktop prompts** aren't captured (Windows blocks hooks there) — a brief
+  blind spot during elevation only.
+
 ## Notes on hooks & antivirus
 
 The agent uses global low-level keyboard/mouse hooks (`SetWindowsHookEx`). Some EDR/AV

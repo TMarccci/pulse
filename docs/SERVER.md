@@ -117,6 +117,20 @@ The filter is evaluated in the **server's local timezone**, so set the container
 
 Otherwise (Docker defaults to UTC) the 9–16 window would be applied in UTC.
 
+## Remote / off-network clients
+
+Agents on machines that leave the office LAN (laptops taken home, remote workers) can
+only upload when they can reach this server. Two options:
+
+- **VPN** — clients on the company VPN reach the server by its internal address; nothing
+  else to expose.
+- **Public HTTPS** — put the server behind a reverse proxy with a TLS certificate and a
+  public hostname, and set `PULSE_SECURE_COOKIES=true`. Point agents at that hostname.
+
+Until a client can reach the server it buffers locally (the spool holds ~14 days) and
+syncs on reconnect. See [remote & home-office scenarios](AGENT.md#remote--home-office-scenarios)
+for what is and isn't captured.
+
 ## Security notes
 
 - Passwords hashed with scrypt; device tokens stored only as SHA-256 hashes.

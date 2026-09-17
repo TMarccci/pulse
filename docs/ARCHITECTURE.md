@@ -43,12 +43,14 @@ Pulse is a consent-based workplace activity monitoring system. It has two halves
 - **Autostart**: registered under `HKCU\...\Run` (per-user) at install/enroll time.
 - **Collectors**:
   - *Keyboard* — low-level `WH_KEYBOARD_LL` hook, counts key-down events.
-  - *Mouse* — low-level `WH_MOUSE_LL` hook, tracks last-activity time; classifies each
-    second as active/idle by the server-configured `idleThresholdSeconds`.
+  - *Mouse* — low-level `WH_MOUSE_LL` hook, counts clicks (any button-down) and tracks
+    last-activity time; classifies each second as active/idle by the server-configured
+    `idleThresholdSeconds`.
   - *Foreground window* — polls `GetForegroundWindow` for window title + owning
     process name.
 - **Buffering & sync**: metrics are aggregated into per-minute buckets in a local
-  SQLite spool, then delivered to the server according to the active **sync mode**:
+  JSONL spool (`spool.jsonl`, ~14-day cap), then delivered to the server according to
+  the active **sync mode**:
   - *Live sync* — flush + heartbeat every N seconds/minutes.
   - *Timed sync* — buffer all day, flush once at a configured wall-clock time.
 - **Config pull**: every sync also pulls the current monitoring rules, so idle
